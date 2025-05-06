@@ -19,13 +19,15 @@ class SessionService:
     def __init__(self):
         """Initialize Redis connection"""
         try:
-            self.redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
+            self.redis = redis.from_url(
+                settings.REDIS_URL, decode_responses=True)
             self.ttl = settings.SESSION_TTL
             # Test connection
             self.redis.ping()
             logger.info("Redis connection established successfully")
         except redis.RedisError as e:
-            logger.error(f"Failed to connect to Redis: {str(e)}", exc_info=True)
+            logger.error(
+                f"Failed to connect to Redis: {str(e)}", exc_info=True)
             # Initialize with None - we'll handle this in the methods
             self.redis = None
             self.ttl = settings.SESSION_TTL
@@ -50,7 +52,8 @@ class SessionService:
         """
         if not self.redis:
             logger.error("Redis connection not available")
-            raise SessionError("Cannot create session - storage service unavailable")
+            raise SessionError(
+                "Cannot create session - storage service unavailable")
 
         try:
             session_id = self._generate_session_id()
@@ -81,10 +84,12 @@ class SessionService:
             return session_data
 
         except redis.RedisError as e:
-            logger.error(f"Redis error creating session: {str(e)}", exc_info=True)
+            logger.error(
+                f"Redis error creating session: {str(e)}", exc_info=True)
             raise SessionError(f"Failed to create session: {str(e)}")
         except json.JSONDecodeError as e:
-            logger.error(f"JSON error creating session: {str(e)}", exc_info=True)
+            logger.error(
+                f"JSON error creating session: {str(e)}", exc_info=True)
             raise SessionError(f"Failed to serialize session data: {str(e)}")
 
     def get_session(self, session_id: str) -> Dict[str, Any]:
@@ -103,7 +108,8 @@ class SessionService:
         """
         if not self.redis:
             logger.error("Redis connection not available")
-            raise SessionError("Cannot retrieve session - storage service unavailable")
+            raise SessionError(
+                "Cannot retrieve session - storage service unavailable")
 
         try:
             key = self._get_key(session_id)
@@ -115,7 +121,8 @@ class SessionService:
                 logger.warning(
                     f"Session not found: {session_id}", extra={"session_id": session_id}
                 )
-                raise SessionNotFoundError(f"Session {session_id} not found or expired")
+                raise SessionNotFoundError(
+                    f"Session {session_id} not found or expired")
 
             # Extend TTL on access
             self.redis.expire(key, self.ttl)
@@ -169,7 +176,8 @@ class SessionService:
         """
         if not self.redis:
             logger.error("Redis connection not available")
-            raise SessionError("Cannot update session - storage service unavailable")
+            raise SessionError(
+                "Cannot update session - storage service unavailable")
 
         try:
             key = self._get_key(session_id)
@@ -185,7 +193,8 @@ class SessionService:
                     f"Session not found for update: {session_id}",
                     extra={"session_id": session_id},
                 )
-                raise SessionNotFoundError(f"Session {session_id} not found or expired")
+                raise SessionNotFoundError(
+                    f"Session {session_id} not found or expired")
 
             try:
                 data = json.loads(data_str)
@@ -211,7 +220,8 @@ class SessionService:
                 if completed:
                     logger.info(
                         f"Steps completed in session {session_id}: {', '.join(completed)}",
-                        extra={"session_id": session_id, "completed_steps": completed},
+                        extra={"session_id": session_id,
+                               "completed_steps": completed},
                     )
 
             # Log current step changes
@@ -239,7 +249,8 @@ class SessionService:
                     extra={"session_id": session_id},
                     exc_info=True,
                 )
-                raise SessionError(f"Failed to store updated session: {str(e)}")
+                raise SessionError(
+                    f"Failed to store updated session: {str(e)}")
 
             logger.info(
                 f"Updated session: {session_id}", extra={"session_id": session_id}
@@ -272,7 +283,8 @@ class SessionService:
         """
         if not self.redis:
             logger.error("Redis connection not available")
-            raise SessionError("Cannot delete session - storage service unavailable")
+            raise SessionError(
+                "Cannot delete session - storage service unavailable")
 
         try:
             key = self._get_key(session_id)
@@ -304,5 +316,4 @@ class SessionService:
             raise SessionError(f"Failed to delete session: {str(e)}")
 
 
-# Create singleton instance
 session_service = SessionService()

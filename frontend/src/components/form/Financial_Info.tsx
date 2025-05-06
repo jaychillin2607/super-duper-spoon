@@ -18,20 +18,17 @@ export default function Financial_Info({
 	handleBack,
 	loading,
 }: Props) {
-	// Track whether fields have been touched
 	const [touched, setTouched] = useState({
 		monthly_revenue: false,
 		years_in_business: false,
-		form: false, // tracks if form has been submitted
+		form: false,
 	});
 
-	// Initialize errors state without any errors initially
 	const [errors, setErrors] = useState({
 		monthly_revenue: "",
 		years_in_business: "",
 	});
 
-	// Validate field and return error message if invalid
 	const validateField = (name: string, value: string): string => {
 		switch (name) {
 			case "monthly_revenue":
@@ -51,44 +48,36 @@ export default function Financial_Info({
 		}
 	};
 
-	// Custom input handler for validation
 	const validateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
 
-		// Mark this field as touched
 		setTouched((prev) => ({
 			...prev,
 			[name]: true,
 		}));
 
-		// Validate this field
 		setErrors((prev) => ({
 			...prev,
 			[name]: validateField(name, value),
 		}));
 
-		// Process the change through the parent handler
 		handleChange(e);
 	};
 
-	// Handle input blur
 	const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
 		const { name } = e.target;
 
-		// Mark field as touched
 		setTouched((prev) => ({
 			...prev,
 			[name]: true,
 		}));
 
-		// Validate on blur
 		setErrors((prev) => ({
 			...prev,
 			[name]: validateField(name, e.target.value),
 		}));
 	};
 
-	// Check if form has any errors
 	const hasErrors = () => {
 		const hasMonthlyRevenueError =
 			validateField("monthly_revenue", formData.monthly_revenue as string) !==
@@ -102,44 +91,12 @@ export default function Financial_Info({
 		return hasMonthlyRevenueError || hasYearsInBusinessError;
 	};
 
-	// Show error only if touched or form submitted
 	const shouldShowError = (fieldName: keyof typeof touched) => {
 		return (
 			(touched[fieldName] || touched.form) &&
 			errors[fieldName as keyof typeof errors] !== ""
 		);
 	};
-
-	// Handle form submission
-	// const handleFormSubmit = (e: React.FormEvent) => {
-	// 	e.preventDefault();
-
-	// 	// Mark all fields as touched
-	// 	setTouched({
-	// 		monthly_revenue: true,
-	// 		years_in_business: true,
-	// 		form: true,
-	// 	});
-
-	// 	// Validate all fields
-	// 	const newErrors = {
-	// 		monthly_revenue: validateField(
-	// 			"monthly_revenue",
-	// 			formData.monthly_revenue as string
-	// 		),
-	// 		years_in_business: validateField(
-	// 			"years_in_business",
-	// 			formData.years_in_business as string
-	// 		),
-	// 	};
-
-	// 	setErrors(newErrors);
-
-	// 	// If no errors, submit the form
-	// 	if (!Object.values(newErrors).some((error) => error !== "")) {
-	// 		// This will trigger the parent's handleSubmit
-	// 	}
-	// };
 
 	return (
 		<div className="space-y-4">

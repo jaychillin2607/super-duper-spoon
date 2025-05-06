@@ -9,24 +9,21 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-# Fix the import path to avoid name collision
-# Make sure we're importing the alembic package, not the local directory
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-# Import application models
 
-# This is the Alembic Config object
 config = alembic_context.config
 
-# Get database URL from application settings
+
 settings = get_settings()
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
-# Interpret the config file for Python logging
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set metadata object for autogenerate support
+
 target_metadata = Base.metadata
 
 

@@ -22,21 +22,21 @@ from app.core.exception_handlers import (
     generic_exception_handler,
 )
 
-# Configure logging with default settings
+
 setup_logging()
 logger = get_logger(__name__)
 
 settings = get_settings()
 logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
 
-# Initialize FastAPI app
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     description="API for merchant lead form with session persistence and enrichment",
 )
 
-# Configure CORS
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # For demo purposes - restrict in production
@@ -45,7 +45,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register exception handlers
+
 app.add_exception_handler(BaseAppException, app_exception_handler)
 app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
 app.add_exception_handler(redis.exceptions.RedisError, redis_exception_handler)
@@ -53,7 +53,7 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(json.JSONDecodeError, json_exception_handler)
 app.add_exception_handler(Exception, generic_exception_handler)
 
-# Include routers
+
 app.include_router(session.router)
 app.include_router(enrichment.router)
 app.include_router(leads.router)

@@ -9,7 +9,6 @@ function App() {
 	const [loading, setLoading] = useState(true);
 	const [backendError, setBackendError] = useState(false);
 
-	// Check backend connectivity on load
 	useEffect(() => {
 		const verifyBackend = async () => {
 			try {

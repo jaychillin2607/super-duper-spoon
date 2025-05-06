@@ -6,17 +6,17 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-# Create database engine
+
 engine = create_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
     pool_pre_ping=True,  # Add connection health check
 )
 
-# Create session factory
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base class for all database models
+
 Base = declarative_base()
 
 

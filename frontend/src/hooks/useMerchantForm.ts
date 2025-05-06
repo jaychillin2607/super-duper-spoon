@@ -24,14 +24,11 @@ export function useMerchantForm() {
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState(false);
 
-	// Track if initial data is loaded
 	const isInitialLoad = useRef(true);
 
-	// Track if user has manually submitted the form
 	const zipCodeBlurred = useRef(false);
 	const businessNameBlurred = useRef(false);
 
-	// Initialize session and load data
 	useEffect(() => {
 		const loadSession = async () => {
 			try {
@@ -40,12 +37,10 @@ export function useMerchantForm() {
 
 				setSessionId(sessionId);
 
-				// If we have form data in the session, use it
 				if (sessionData && sessionData.form_data) {
 					const formData = sessionData.form_data;
 					setFormData(formData);
 
-					// Determine which step to show based on completed data
 					const completedSteps = formData.completed_steps || {};
 
 					if (completedSteps.step3) {
@@ -56,7 +51,6 @@ export function useMerchantForm() {
 						setCurrentStep(1);
 					}
 
-					// Check if business data has been enriched
 					if (formData.enrichment_data) {
 						setEnriched(true);
 					}
@@ -73,7 +67,6 @@ export function useMerchantForm() {
 		loadSession();
 	}, []);
 
-	// Save session data to backend
 	const saveSession = async (
 		updatedData: Partial<FormData> = {},
 		step: number = currentStep
@@ -81,17 +74,14 @@ export function useMerchantForm() {
 		if (!sessionId) return;
 
 		try {
-			// Combine current form data with updates
 			const newFormData = { ...formData, ...updatedData };
 
-			// Update the completed steps status
 			const completedSteps = newFormData.completed_steps || {
 				step1: false,
 				step2: false,
 				step3: false,
 			};
 
-			// Mark the current step as completed if all required fields are filled
 			if (
 				step === 1 &&
 				newFormData.first_name &&
@@ -115,41 +105,32 @@ export function useMerchantForm() {
 				completedSteps.step3 = true;
 			}
 
-			// Update the form data with the current step and completed status
 			const dataToSave = {
 				...newFormData,
 				completed_steps: completedSteps,
 				current_step: step,
 			};
 
-			// Send update to backend
 			await updateSession(sessionId, dataToSave);
 
-			// Update local state
 			setFormData(dataToSave);
 		} catch (err) {
 			console.error("Error saving session:", err);
-			// We don't set error state here to avoid interrupting form flow
-			// But we do log the error for debugging
 		}
 	};
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
 
-		// Clear error on input
 		if (error) setError(null);
 
-		// If changing zip code, reset enrichment status
 		if (name === "zip_code") {
 			setEnriched(false);
 		}
 
-		// Update local state
 		setFormData((prev) => ({ ...prev, [name]: value }));
 	};
 
-	// Handle field blur to mark fields as blurred
 	const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
 		const { name } = e.target;
 
@@ -159,7 +140,6 @@ export function useMerchantForm() {
 			businessNameBlurred.current = true;
 		}
 
-		// Attempt enrichment if both fields are complete
 		if (
 			currentStep === 2 &&
 			formData.business_name &&
@@ -178,7 +158,6 @@ export function useMerchantForm() {
 	};
 
 	const handleNext = async () => {
-		// Validate current step
 		if (currentStep === 1) {
 			if (
 				!formData.first_name ||
@@ -195,13 +174,11 @@ export function useMerchantForm() {
 				return;
 			}
 
-			// If we have business info but haven't enriched it yet
 			if (!enriched && !enriching) {
 				await enrichBusinessInfo();
 			}
 		}
 
-		// Save form data and move to next step
 		await saveSession(formData, currentStep);
 		setCurrentStep((prev) => prev + 1);
 	};
@@ -229,7 +206,6 @@ export function useMerchantForm() {
 				sessionId
 			);
 
-			// Update form data with enrichment results
 			const updatedData = {
 				...formData,
 				business_start_date: enrichmentData.business_start_date,
@@ -240,7 +216,6 @@ export function useMerchantForm() {
 			setFormData(updatedData);
 			setEnriched(true);
 
-			// Save the enriched data to the session
 			await saveSession(updatedData);
 		} catch (err) {
 			console.error("Error enriching business data:", err);
@@ -260,7 +235,6 @@ export function useMerchantForm() {
 			return;
 		}
 
-		// Validate final step
 		if (!formData.monthly_revenue || !formData.years_in_business) {
 			setError("Please fill out all required fields");
 			return;
@@ -270,7 +244,6 @@ export function useMerchantForm() {
 		setError(null);
 
 		try {
-			// Save final form data
 			await saveSession(
 				{
 					...formData,
@@ -283,13 +256,10 @@ export function useMerchantForm() {
 				3
 			);
 
-			// Submit the lead from session
 			await submitLeadFromSession(sessionId);
 
-			// Delete the session
 			localStorage.removeItem("sessionId");
 
-			// Show success message
 			setSuccess(true);
 		} catch (err: any) {
 			console.error("Error submitting application:", err);
@@ -303,13 +273,10 @@ export function useMerchantForm() {
 	};
 
 	useEffect(() => {
-		// Skip if not on step 2
 		if (currentStep !== 2) return;
 
-		// Skip if already enriching
 		if (enriching) return;
 
-		// Only enrich if zip code is exactly 5 characters and we have a business name
 		const shouldEnrich =
 			sessionId &&
 			formData.business_name &&

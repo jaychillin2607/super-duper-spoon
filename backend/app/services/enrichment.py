@@ -22,7 +22,8 @@ class EnrichmentService:
         self.timeout = settings.ENRICHMENT_API_TIMEOUT
         self.simulate_delay = settings.ENRICHMENT_SIMULATE_DELAY
         self.failure_rate = settings.ENRICHMENT_SIMULATE_FAILURE_RATE
-        logger.info(f"Enrichment service initialized with API URL: {self.api_url}")
+        logger.info(
+            f"Enrichment service initialized with API URL: {self.api_url}")
 
     def _simulate_api_delay(self):
         """Simulate realistic API latency"""
@@ -32,7 +33,8 @@ class EnrichmentService:
             logger.debug(f"Simulating API delay of {delay:.2f} seconds")
             time.sleep(delay)
         except Exception as e:
-            logger.warning(f"Error simulating API delay: {str(e)}", exc_info=True)
+            logger.warning(
+                f"Error simulating API delay: {str(e)}", exc_info=True)
             # Default delay if configuration is invalid
             time.sleep(1.0)
 
@@ -46,7 +48,8 @@ class EnrichmentService:
                 )
             return failure
         except Exception as e:
-            logger.warning(f"Error in failure simulation: {str(e)}", exc_info=True)
+            logger.warning(
+                f"Error in failure simulation: {str(e)}", exc_info=True)
             # Default to no failure if configuration is invalid
             return False
 
@@ -73,7 +76,8 @@ class EnrichmentService:
             start_date = datetime.now() - timedelta(days=365 * years_ago)
 
             # Possible SOS statuses
-            statuses = ["Active", "Good Standing", "Inactive", "Revoked", "Suspended"]
+            statuses = ["Active", "Good Standing",
+                        "Inactive", "Revoked", "Suspended"]
 
             # Industry codes (random NAICS codes)
             industry_codes = ["445110", "541330", "722511", "621111", "238220"]
@@ -105,14 +109,17 @@ class EnrichmentService:
 
             # Log verification status
             if is_verified:
-                logger.info(f"Business verified: {business_name} in {zip_code}")
+                logger.info(
+                    f"Business verified: {business_name} in {zip_code}")
             else:
-                logger.info(f"Business not verified: {business_name} in {zip_code}")
+                logger.info(
+                    f"Business not verified: {business_name} in {zip_code}")
 
             return enrichment_data
 
         except Exception as e:
-            logger.error(f"Error generating mock data: {str(e)}", exc_info=True)
+            logger.error(
+                f"Error generating mock data: {str(e)}", exc_info=True)
             # Return minimal data if an error occurs
             return {
                 "business_name": business_name,
@@ -196,7 +203,8 @@ class EnrichmentService:
                 )
                 raise EnrichmentError(
                     "Unable to verify business at this time. Please try again later.",
-                    details={"business_name": business_name, "zip_code": zip_code},
+                    details={"business_name": business_name,
+                             "zip_code": zip_code},
                 )
 
             # Generate mock data
@@ -206,7 +214,8 @@ class EnrichmentService:
 
             # Log enrichment results
             verification_status = (
-                "verified" if enrichment_data.get("verified", False) else "not verified"
+                "verified" if enrichment_data.get(
+                    "verified", False) else "not verified"
             )
             logger.info(
                 f"Business {verification_status}: {business_name} in {zip_code}",
@@ -266,5 +275,4 @@ class EnrichmentService:
             )
 
 
-# Create singleton instance
 enrichment_service = EnrichmentService()

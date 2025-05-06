@@ -298,8 +298,8 @@ class LeadService:
                 },
                 exc_info=True,
             )
-            raise DatabaseError(f"Unexpected error submitting lead: {error_msg}")
+            raise DatabaseError(
+                f"Unexpected error submitting lead: {error_msg}")
 
 
-# Create singleton instance
 lead_service = LeadService()

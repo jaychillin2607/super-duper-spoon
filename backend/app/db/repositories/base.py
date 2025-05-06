@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import Base
 
-# Define a type variable for ORM models
+
 ModelType = TypeVar("ModelType", bound=Base)
 
 

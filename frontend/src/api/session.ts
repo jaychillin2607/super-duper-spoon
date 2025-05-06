@@ -2,7 +2,6 @@ import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-// Create an axios instance with default config
 const apiClient = axios.create({
 	baseURL: API_BASE_URL,
 	headers: {
@@ -31,7 +30,6 @@ export async function getSession(sessionId: string) {
 		const response = await apiClient.get(`/sessions/${sessionId}`);
 		return response.data;
 	} catch (error) {
-		// If session not found (404), return null instead of throwing
 		if (axios.isAxiosError(error) && error.response?.status === 404) {
 			return null;
 		}
@@ -78,34 +76,28 @@ export async function initializeSession(): Promise<{
 	sessionId: string;
 	sessionData: any;
 }> {
-	// Try to get session ID from localStorage
 	const storedSessionId = localStorage.getItem("sessionId");
 	let sessionId: string;
 	let sessionData: any = null;
 
-	// If we have a session ID, try to retrieve it
 	if (storedSessionId) {
 		try {
 			sessionData = await getSession(storedSessionId);
-			// If we successfully retrieved the session, use the stored session ID
+
 			if (sessionData) {
 				sessionId = storedSessionId;
 				return { sessionId, sessionData };
 			}
-			// If sessionData is null, we'll continue to create a new session
 		} catch (error) {
 			console.error("Failed to retrieve session, will create new", error);
-			// Continue to create a new session
 		}
 	}
 
-	// If no session ID or failed to retrieve, create a new session
 	try {
 		const newSession = await createSession();
 		sessionId = newSession.session_id;
 		sessionData = newSession;
 
-		// Store session ID in localStorage
 		localStorage.setItem("sessionId", sessionId);
 
 		return { sessionId, sessionData };

@@ -9,7 +9,7 @@ import { useState } from "react";
 interface Props {
 	formData: FormData;
 	handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-	handleBlur: (e: React.FocusEvent<HTMLInputElement>) => void; // Add the blur handler
+	handleBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 	handleNext: () => void;
 	handleBack: () => void;
 	enriching: boolean;
@@ -25,27 +25,23 @@ export default function Business_Info({
 	enriching,
 	enriched,
 }: Props) {
-	// Track whether form has been interacted with
 	const [touched, setTouched] = useState({
 		business_name: false,
 		tin: false,
 		zip_code: false,
-		form: false, // tracks if form has been submitted
+		form: false,
 	});
 
-	// Initialize errors state - start with no errors
 	const [errors, setErrors] = useState({
 		business_name: "",
 		tin: "",
 		zip_code: "",
 	});
 
-	// Safely trim a string, handling null or undefined
 	const safeTrim = (str: string | null | undefined): string => {
 		return str ? str.trim() : "";
 	};
 
-	// Validate field and return error message if invalid
 	const validateField = (
 		name: string,
 		value: string | null | undefined
@@ -76,48 +72,38 @@ export default function Business_Info({
 		}
 	};
 
-	// Custom input handler for validation
 	const validateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
 
-		// Mark this field as touched
 		setTouched((prev) => ({
 			...prev,
 			[name]: true,
 		}));
 
-		// Validate this field
 		setErrors((prev) => ({
 			...prev,
 			[name]: validateField(name, value),
 		}));
 
-		// Process the change through the parent handler
 		handleChange(e);
 	};
 
-	// Handle input blur for enrichment
 	const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-		// Mark as touched
 		const { name } = e.target;
 		setTouched((prev) => ({
 			...prev,
 			[name]: true,
 		}));
 
-		// Validate on blur
 		setErrors((prev) => ({
 			...prev,
 			[name]: validateField(name, e.target.value),
 		}));
 
-		// Call the parent blur handler for enrichment logic
 		handleBlur(e);
 	};
 
-	// Check if form has any errors - for disabling the Next button
 	const hasErrors = () => {
-		// Only check for errors if form submitted or fields have been touched
 		if (
 			!touched.form &&
 			!touched.business_name &&
@@ -127,7 +113,6 @@ export default function Business_Info({
 			return false;
 		}
 
-		// Validate all fields
 		const hasBusinessNameError =
 			validateField("business_name", formData.business_name) !== "";
 		const hasTinError = validateField("tin", formData.tin) !== "";
@@ -136,9 +121,7 @@ export default function Business_Info({
 		return hasBusinessNameError || hasTinError || hasZipCodeError;
 	};
 
-	// Validation before proceeding to next step
 	const validateAndProceed = () => {
-		// Mark form as submitted
 		setTouched({
 			business_name: true,
 			tin: true,
@@ -146,7 +129,6 @@ export default function Business_Info({
 			form: true,
 		});
 
-		// Validate all fields
 		const newErrors = {
 			business_name: validateField("business_name", formData.business_name),
 			tin: validateField("tin", formData.tin),
@@ -155,18 +137,15 @@ export default function Business_Info({
 
 		setErrors(newErrors);
 
-		// Check if there are any errors
 		const hasValidationErrors = Object.values(newErrors).some(
 			(error) => error !== ""
 		);
 
-		// Only proceed if all validations pass
 		if (!hasValidationErrors) {
 			handleNext();
 		}
 	};
 
-	// Show error only if the field has been touched or form submitted
 	const shouldShowError = (fieldName: keyof typeof touched) => {
 		return (
 			(touched[fieldName] || touched.form) &&
@@ -174,7 +153,6 @@ export default function Business_Info({
 		);
 	};
 
-	// Show enrichment data from the response
 	const renderEnrichmentData = () => {
 		if (!enriched || !formData.enrichment_data) {
 			return null;
@@ -213,7 +191,7 @@ export default function Business_Info({
 					name="business_name"
 					value={formData.business_name || ""}
 					onChange={validateInput}
-					onBlur={handleInputBlur} // Use our new blur handler
+					onBlur={handleInputBlur}
 					required
 					className={`bg-white ${
 						shouldShowError("business_name")
@@ -235,7 +213,7 @@ export default function Business_Info({
 					name="tin"
 					value={formData.tin || ""}
 					onChange={validateInput}
-					onBlur={handleInputBlur} // Use our new blur handler
+					onBlur={handleInputBlur}
 					required
 					className={`bg-white ${
 						shouldShowError("tin") ? "border-red-500" : "border-gray-300"
