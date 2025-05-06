@@ -2,6 +2,8 @@
 
 This application implements a 3-step merchant application form with session persistence and data enrichment capabilities. It fulfills the requirements specified in the Cardiff Lead-to-Funding take-home assignment.
 
+![](./architecture-diagram.png)
+
 ## Features
 
 - **Multi-step Form**: A 3-step form collecting merchant information:
