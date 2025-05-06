@@ -23,7 +23,8 @@ class Settings(BaseSettings):
     # Enrichment API settings
     ENRICHMENT_API_URL: str = "https://api.example.com/tib-verification"
     ENRICHMENT_API_TIMEOUT: int = 5  # seconds
-    ENRICHMENT_SIMULATE_DELAY: tuple = (0.5, 2.0)  # min and max delay in seconds
+    ENRICHMENT_SIMULATE_DELAY: tuple = (
+        0.5, 2.0)  # min and max delay in seconds
     ENRICHMENT_SIMULATE_FAILURE_RATE: float = 0.1  # 10% chance of failure
 
     # Logging settings

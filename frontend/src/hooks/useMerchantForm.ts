@@ -4,21 +4,21 @@ import type { FormData } from "@/types/formType";
 import { useEffect, useRef, useState } from "react";
 
 // Simple debounce hook
-function useDebounce<T>(value: T, delay: number): T {
-	const [debouncedValue, setDebouncedValue] = useState<T>(value);
+// function useDebounce<T>(value: T, delay: number): T {
+// 	const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			setDebouncedValue(value);
-		}, delay);
+// 	useEffect(() => {
+// 		const timer = setTimeout(() => {
+// 			setDebouncedValue(value);
+// 		}, delay);
 
-		return () => {
-			clearTimeout(timer);
-		};
-	}, [value, delay]);
+// 		return () => {
+// 			clearTimeout(timer);
+// 		};
+// 	}, [value, delay]);
 
-	return debouncedValue;
-}
+// 	return debouncedValue;
+// }
 
 export function useMerchantForm() {
 	const [sessionId, setSessionId] = useState<string | null>(null);
@@ -45,10 +45,10 @@ export function useMerchantForm() {
 	const isInitialLoad = useRef(true);
 
 	// Debounce the zip code to prevent unnecessary API calls
-	const debouncedZipCode = useDebounce(formData.zip_code, 500);
-	const debouncedBusinessName = useDebounce(formData.business_name, 500);
-	const prevZipCodeRef = useRef(debouncedZipCode);
-	const prevBusinessNameRef = useRef(debouncedBusinessName);
+	// const debouncedZipCode = useDebounce(formData.zip_code, 500);
+	// const debouncedBusinessName = useDebounce(formData.business_name, 500);
+	// const prevZipCodeRef = useRef(debouncedZipCode);
+	// const prevBusinessNameRef = useRef(debouncedBusinessName);
 
 	// Track if user has manually submitted the form
 	const zipCodeBlurred = useRef(false);
@@ -163,11 +163,9 @@ export function useMerchantForm() {
 		// Clear error on input
 		if (error) setError(null);
 
-		// Reset blurred state when user is typing
+		// If changing zip code, reset enrichment status
 		if (name === "zip_code") {
-			zipCodeBlurred.current = false;
-		} else if (name === "business_name") {
-			businessNameBlurred.current = false;
+			setEnriched(false);
 		}
 
 		// Update local state
@@ -327,36 +325,28 @@ export function useMerchantForm() {
 		}
 	};
 
-	// Better enrichment trigger with debounce and additional safeguards
 	useEffect(() => {
-		// Skip on initial load or if not on step 2
-		if (isInitialLoad.current || currentStep !== 2) return;
+		// Skip if not on step 2
+		if (currentStep !== 2) return;
 
-		// Skip if already enriched or enriching
-		if (enriched || enriching) return;
+		// Skip if already enriching
+		if (enriching) return;
 
-		// Only enrich if we have session, valid business name and zip code (at least 5 digits)
+		// Only enrich if zip code is exactly 5 characters and we have a business name
 		const shouldEnrich =
 			sessionId &&
-			debouncedBusinessName &&
-			debouncedBusinessName.length > 1 &&
-			debouncedZipCode &&
-			debouncedZipCode.length >= 5 &&
-			// Make sure both fields have been blurred to prevent partial data
-			zipCodeBlurred.current &&
-			businessNameBlurred.current &&
-			// Ensure zip code has changed since last enrichment
-			debouncedZipCode !== prevZipCodeRef.current;
+			formData.business_name &&
+			formData.business_name.trim().length > 1 &&
+			formData.zip_code &&
+			formData.zip_code.length === 5 &&
+			!enriched;
 
 		if (shouldEnrich) {
-			// Update refs to prevent repeated enrichment with same data
-			prevZipCodeRef.current = debouncedZipCode;
-			prevBusinessNameRef.current = debouncedBusinessName;
 			enrichBusinessInfo();
 		}
 	}, [
-		debouncedZipCode,
-		debouncedBusinessName,
+		formData.zip_code,
+		formData.business_name,
 		currentStep,
 		sessionId,
 		enriched,

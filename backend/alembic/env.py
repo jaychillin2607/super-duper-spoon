@@ -1,3 +1,7 @@
+from app.core.config import get_settings
+from app.models.domain.lead import Lead  # Import specific model
+from app.db.session import Base
+import alembic.context as alembic_context
 import sys
 import os
 from logging.config import fileConfig
@@ -8,12 +12,8 @@ from sqlalchemy import pool
 # Fix the import path to avoid name collision
 # Make sure we're importing the alembic package, not the local directory
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-import alembic.context as alembic_context
 
 # Import application models
-from app.db.session import Base
-from app.models.domain.lead import Lead  # Import specific model
-from app.core.config import get_settings
 
 # This is the Alembic Config object
 config = alembic_context.config

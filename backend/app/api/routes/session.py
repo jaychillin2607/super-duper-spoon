@@ -96,7 +96,8 @@ async def get_session(session_id: str, request: Request) -> Dict[str, Any]:
             extra={"session_id": session_id, "error": str(e)},
         )
 
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     except SessionError as e:
         logger.error(
             f"API: Error retrieving session {session_id}: {str(e)}",
@@ -170,7 +171,8 @@ async def update_session(
             extra={"session_id": session_id, "error": str(e)},
         )
 
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     except SessionError as e:
         logger.error(
             f"API: Error updating session {session_id}: {str(e)}",

@@ -52,7 +52,8 @@ async def enrich_business_data(request: EnrichmentRequest) -> Dict[str, Any]:
         return enrichment_data
 
     except SessionNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     except EnrichmentError as e:
         raise HTTPException(
             status_code=e.status_code,

@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { FormData } from "@/types/formType";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface Props {
 	formData: FormData;
@@ -18,67 +18,128 @@ export default function Financial_Info({
 	handleBack,
 	loading,
 }: Props) {
-	// Initialize errors state
-	const [errors, setErrors] = useState({
-		monthly_revenue: formData.monthly_revenue
-			? ""
-			: "Monthly revenue is required",
-		years_in_business: formData.years_in_business
-			? Number(formData.years_in_business) < 0
-				? "Years in business cannot be negative"
-				: ""
-			: "Years in business is required",
+	// Track whether fields have been touched
+	const [touched, setTouched] = useState({
+		monthly_revenue: false,
+		years_in_business: false,
+		form: false, // tracks if form has been submitted
 	});
 
-	// Use useEffect to update validation on formData changes
-	useEffect(() => {
-		setErrors({
-			monthly_revenue: !formData.monthly_revenue
-				? "Monthly revenue is required"
-				: "",
-			years_in_business: !formData.years_in_business
-				? "Years in business is required"
-				: Number(formData.years_in_business) < 0
-				? "Years in business cannot be negative"
-				: "",
-		});
-	}, [formData]);
+	// Initialize errors state without any errors initially
+	const [errors, setErrors] = useState({
+		monthly_revenue: "",
+		years_in_business: "",
+	});
 
-	// Custom input handler for validation
-	const validateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target;
-		let newErrors = { ...errors };
-
-		// Validate based on field name
+	// Validate field and return error message if invalid
+	const validateField = (name: string, value: string): string => {
 		switch (name) {
 			case "monthly_revenue":
-				newErrors.monthly_revenue = !value ? "Monthly revenue is required" : "";
-				break;
+				return !value
+					? "Monthly revenue is required"
+					: Number(value) <= 0
+					? "Monthly revenue must be greater than zero"
+					: "";
 			case "years_in_business":
-				newErrors.years_in_business = !value
+				return !value
 					? "Years in business is required"
 					: Number(value) < 0
 					? "Years in business cannot be negative"
 					: "";
-				break;
+			default:
+				return "";
 		}
+	};
 
-		setErrors(newErrors);
+	// Custom input handler for validation
+	const validateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.target;
+
+		// Mark this field as touched
+		setTouched((prev) => ({
+			...prev,
+			[name]: true,
+		}));
+
+		// Validate this field
+		setErrors((prev) => ({
+			...prev,
+			[name]: validateField(name, value),
+		}));
 
 		// Process the change through the parent handler
 		handleChange(e);
 	};
 
+	// Handle input blur
+	const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+		const { name } = e.target;
+
+		// Mark field as touched
+		setTouched((prev) => ({
+			...prev,
+			[name]: true,
+		}));
+
+		// Validate on blur
+		setErrors((prev) => ({
+			...prev,
+			[name]: validateField(name, e.target.value),
+		}));
+	};
+
 	// Check if form has any errors
 	const hasErrors = () => {
+		const hasMonthlyRevenueError =
+			validateField("monthly_revenue", formData.monthly_revenue as string) !==
+			"";
+		const hasYearsInBusinessError =
+			validateField(
+				"years_in_business",
+				formData.years_in_business as string
+			) !== "";
+
+		return hasMonthlyRevenueError || hasYearsInBusinessError;
+	};
+
+	// Show error only if touched or form submitted
+	const shouldShowError = (fieldName: keyof typeof touched) => {
 		return (
-			errors.monthly_revenue !== "" ||
-			errors.years_in_business !== "" ||
-			!formData.monthly_revenue ||
-			!formData.years_in_business ||
-			Number(formData.years_in_business) < 0
+			(touched[fieldName] || touched.form) &&
+			errors[fieldName as keyof typeof errors] !== ""
 		);
 	};
+
+	// Handle form submission
+	// const handleFormSubmit = (e: React.FormEvent) => {
+	// 	e.preventDefault();
+
+	// 	// Mark all fields as touched
+	// 	setTouched({
+	// 		monthly_revenue: true,
+	// 		years_in_business: true,
+	// 		form: true,
+	// 	});
+
+	// 	// Validate all fields
+	// 	const newErrors = {
+	// 		monthly_revenue: validateField(
+	// 			"monthly_revenue",
+	// 			formData.monthly_revenue as string
+	// 		),
+	// 		years_in_business: validateField(
+	// 			"years_in_business",
+	// 			formData.years_in_business as string
+	// 		),
+	// 	};
+
+	// 	setErrors(newErrors);
+
+	// 	// If no errors, submit the form
+	// 	if (!Object.values(newErrors).some((error) => error !== "")) {
+	// 		// This will trigger the parent's handleSubmit
+	// 	}
+	// };
 
 	return (
 		<div className="space-y-4">
@@ -94,12 +155,17 @@ export default function Financial_Info({
 					type="number"
 					min="0"
 					step="1"
-					value={formData.monthly_revenue}
+					value={formData.monthly_revenue || ""}
 					onChange={validateInput}
+					onBlur={handleBlur}
 					required
-					className={errors.monthly_revenue ? "border-red-500" : ""}
+					className={`bg-white ${
+						shouldShowError("monthly_revenue")
+							? "border-red-500"
+							: "border-gray-300"
+					}`}
 				/>
-				{errors.monthly_revenue && (
+				{shouldShowError("monthly_revenue") && (
 					<p className="text-red-500 text-sm mt-1">{errors.monthly_revenue}</p>
 				)}
 			</div>
@@ -113,13 +179,18 @@ export default function Financial_Info({
 					name="years_in_business"
 					type="number"
 					min="0"
-					step="1"
-					value={formData.years_in_business}
+					step="0.1"
+					value={formData.years_in_business || ""}
 					onChange={validateInput}
+					onBlur={handleBlur}
 					required
-					className={errors.years_in_business ? "border-red-500" : ""}
+					className={`bg-white ${
+						shouldShowError("years_in_business")
+							? "border-red-500"
+							: "border-gray-300"
+					}`}
 				/>
-				{errors.years_in_business && (
+				{shouldShowError("years_in_business") && (
 					<p className="text-red-500 text-sm mt-1">
 						{errors.years_in_business}
 					</p>
@@ -130,7 +201,15 @@ export default function Financial_Info({
 				<Button type="button" onClick={handleBack}>
 					Back
 				</Button>
-				<Button type="submit" disabled={loading || hasErrors()}>
+				<Button
+					type="submit"
+					disabled={
+						loading ||
+						hasErrors() ||
+						!formData.monthly_revenue ||
+						!formData.years_in_business
+					}
+				>
 					{loading ? (
 						<>
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" />

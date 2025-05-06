@@ -37,7 +37,8 @@ def upgrade() -> None:
         # Primary key
         sa.PrimaryKeyConstraint("id"),
         # Composite unique constraint
-        sa.UniqueConstraint("email", "business_name", name="uq_lead_email_business"),
+        sa.UniqueConstraint("email", "business_name",
+                            name="uq_lead_email_business"),
     )
 
     # Create indexes
