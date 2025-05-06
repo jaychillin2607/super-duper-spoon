@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = {extras = ["standard"], version = "*"}
+sqlalchemy = "*"
+pydantic-settings = "*"
+redis = "*"
+psycopg = {extras = ["binary"], version = "*"}
+psycopg2-binary = "*"
+alembic = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"
