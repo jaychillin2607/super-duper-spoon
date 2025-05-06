@@ -3,23 +3,6 @@ import { initializeSession, updateSession } from "@/api/session";
 import type { FormData } from "@/types/formType";
 import { useEffect, useRef, useState } from "react";
 
-// Simple debounce hook
-// function useDebounce<T>(value: T, delay: number): T {
-// 	const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-// 	useEffect(() => {
-// 		const timer = setTimeout(() => {
-// 			setDebouncedValue(value);
-// 		}, delay);
-
-// 		return () => {
-// 			clearTimeout(timer);
-// 		};
-// 	}, [value, delay]);
-
-// 	return debouncedValue;
-// }
-
 export function useMerchantForm() {
 	const [sessionId, setSessionId] = useState<string | null>(null);
 	const [formData, setFormData] = useState<FormData>({
@@ -43,12 +26,6 @@ export function useMerchantForm() {
 
 	// Track if initial data is loaded
 	const isInitialLoad = useRef(true);
-
-	// Debounce the zip code to prevent unnecessary API calls
-	// const debouncedZipCode = useDebounce(formData.zip_code, 500);
-	// const debouncedBusinessName = useDebounce(formData.business_name, 500);
-	// const prevZipCodeRef = useRef(debouncedZipCode);
-	// const prevBusinessNameRef = useRef(debouncedBusinessName);
 
 	// Track if user has manually submitted the form
 	const zipCodeBlurred = useRef(false);
@@ -356,7 +333,7 @@ export function useMerchantForm() {
 	return {
 		formData,
 		handleChange,
-		handleBlur, // Export the new handler
+		handleBlur,
 		currentStep,
 		handleNext,
 		handleBack,

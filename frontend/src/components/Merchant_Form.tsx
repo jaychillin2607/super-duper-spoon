@@ -12,7 +12,7 @@ export default function MerchantForm() {
 	const {
 		formData,
 		handleChange,
-		handleBlur, // Include the handleBlur function from the hook
+		handleBlur,
 		currentStep,
 		handleNext,
 		handleBack,
