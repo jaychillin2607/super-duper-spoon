@@ -1,13 +1,13 @@
-version: '3.8'
+version: "3.8"
 
 networks:
   merchant_net:
     driver: bridge
 
 services:
-  api:
+  backend:
     build:
-      context: ..
+      context: ./backend
       dockerfile: docker/Dockerfile
     ports:
       - "8000:8000"
@@ -63,7 +63,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      
+
+  frontend:
+    build:
+      context: ./frontend
+    networks:
+      - merchant_net
+    depends_on:
+      - backend
+    container_name: cardiff_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://backend:8000
+    stdin_open: true
+    tty: true
+    restart: always
+
 volumes:
   postgres_data:
   redis_data:

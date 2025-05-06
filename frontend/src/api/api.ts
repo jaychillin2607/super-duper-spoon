@@ -1,52 +1,71 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8000"; // Change this to your FastAPI server URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+// Create an axios instance with default config
+const apiClient = axios.create({
+	baseURL: API_BASE_URL,
+	headers: {
+		"Content-Type": "application/json",
+	},
+});
+
+/**
+ * Enriches business data with TIB verification API
+ */
 export async function enrichBusinessData(
-  businessName: string,
-  zipCode: string
+	businessName: string,
+	zipCode: string,
+	sessionId: string
 ) {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/api/enrich`, null, {
-      params: {
-        business_name: businessName,
-        zip_code: zipCode,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error enriching business data:", error);
-    throw error;
-  }
+	try {
+		const response = await apiClient.post("/enrichment", {
+			business_name: businessName,
+			zip_code: zipCode,
+			session_id: sessionId,
+		});
+		return response.data;
+	} catch (error) {
+		console.error("Error enriching business data:", error);
+		throw error;
+	}
 }
 
-export async function saveSessionData(sessionId: string, data: any) {
-  try {
-    await axios.post(`${API_BASE_URL}/api/save-session/${sessionId}`, data);
-  } catch (error) {
-    console.error("Error saving session data:", error);
-    // Continue even if saving to backend fails - we still have localStorage
-  }
-}
-
-export async function getSessionData(sessionId: string) {
-  try {
-    const response = await axios.get(
-      `${API_BASE_URL}/api/get-session/${sessionId}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error getting session data:", error);
-    return null;
-  }
-}
-
+/**
+ * Submit lead data from the form directly
+ */
 export async function submitLeadData(data: any) {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/api/leads`, data);
-    return response.data;
-  } catch (error) {
-    console.error("Error submitting lead data:", error);
-    throw error;
-  }
+	try {
+		const response = await apiClient.post("/leads", data);
+		return response.data;
+	} catch (error) {
+		console.error("Error submitting lead data:", error);
+		throw error;
+	}
+}
+
+/**
+ * Submit lead from session data
+ */
+export async function submitLeadFromSession(sessionId: string) {
+	try {
+		const response = await apiClient.post(`/leads/submit/${sessionId}`);
+		return response.data;
+	} catch (error) {
+		console.error("Error submitting lead from session:", error);
+		throw error;
+	}
+}
+
+/**
+ * Adds a health check function to verify backend connectivity
+ */
+export async function checkBackendHealth() {
+	try {
+		const response = await apiClient.get("/health");
+		return response.data.status === "ok";
+	} catch (error) {
+		console.error("Backend health check failed:", error);
+		return false;
+	}
 }
